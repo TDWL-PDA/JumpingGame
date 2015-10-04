@@ -76,12 +76,14 @@ XMFLOAT2 Player::Normalize(XMFLOAT2 vector)
 	return vector;
 }
 
-// If all goes well, you should only need to adjust FPS
+// If all goes well, you should only need to adjust FPS.
+// I'm adjusting the other stuff so you get a feel for how the game plays.
+// Note that that's incorrect, though - it should only be FPS.
 void Player::increaseSpeed(float multiplier) {
-	//Speed *= multiplier;
-	//setSpeed(Speed);
+	Speed *= multiplier;
+	setSpeed(Speed);
 	setFPS(getFPS()*multiplier);
-	//gravity *= multiplier;
+	gravity *= multiplier;
 }
 
 void Player::reset() {

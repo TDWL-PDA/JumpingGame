@@ -90,13 +90,15 @@ bool Buildings::IntersectsWith(Sprite* sprite) {
 	return false;
 }
 
-//
+// If all goes according to plan, you should only need to update FPS
+// For now, I'm updating speed so you get a feel for the game.
+// (this is incorrect, it should be FPS).
 void Buildings::increaseSpeed(float multiplier) {
-	framesPerSecond *= multiplier;
-	//Speed *= multiplier;
+	//framesPerSecond *= multiplier;
+	Speed *= multiplier;
 	for (Sprite* b : blocks) {
-		b->setFPS(framesPerSecond);
-		//b->setSpeed(Speed);
+		//b->setFPS(framesPerSecond);
+		b->setSpeed(Speed);
 	}
 }
 

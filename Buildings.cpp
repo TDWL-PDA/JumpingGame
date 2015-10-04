@@ -95,6 +95,7 @@ bool Buildings::IntersectsWith(Sprite* sprite) {
 // (this is incorrect, it should be FPS).
 void Buildings::increaseSpeed(float multiplier) {
 	//framesPerSecond *= multiplier;
+	fdsfdsa;
 	Speed *= multiplier;
 	for (Sprite* b : blocks) {
 		//b->setFPS(framesPerSecond);

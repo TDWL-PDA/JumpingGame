@@ -19,7 +19,7 @@ the sprite will never switch to a different animation cycle automatically - it h
 Therefore, if you want an animation cycle to only run once, use the animationPlayedOnce variable to know when to change the loop back to something else.
 */
 
-const int POS_ADJUST = 1;
+const int POS_ADJUST = 1;	// Amount position adjusts incrementally when the method is called.
 
 class Sprite
 {
@@ -55,6 +55,7 @@ public:
 	Windows::Foundation::Rect* getBoundingBox();
 	void reset();
 	void adjustPosition();
+	void setOpacity(float opacity);	// Sets how clear the sprite should now be, from 0 to 1
 
 private:
 	Spritesheet spritesheet;

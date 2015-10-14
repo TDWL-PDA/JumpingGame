@@ -227,6 +227,13 @@ void Sprite::adjustPosition()
 	BoundingBox = CreateBoundingBoxFromPosition(position);
 }
 
+void Sprite::setOpacity(float opacity) {
+	if (opacity > 1 || opacity < 0)
+		return;
+	XMVECTORF32 newColor = { color.f[0], color.f[1], color.f[2], opacity };
+	color = newColor;
+}
+
 float Sprite::getWidth() { return spritesheet.currentSize.x * scale; }
 float Sprite::getHeight() { return spritesheet.currentSize.y * scale; }
 XMFLOAT2 Sprite::getVelocity() { return Velocity; }

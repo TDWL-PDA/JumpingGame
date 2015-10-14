@@ -31,6 +31,7 @@ static int SWIPE = 4;	// Number of frames of person swiping up that will registe
 static int SCORE_SPEED_INCREASE = 50;	// Incremental score where speed will increase
 static int SCORE_SPEED_LIMIT = SCORE_SPEED_INCREASE * 50;	// Score where speed stops increasing
 static float SPEED_MULTIPLIER = 1.25;
+static float TRANSITION_TIME = .5;	// Time in seconds that transitioning between screens takes.
 
 ref class Renderer sealed : public Direct3DBase
 {
@@ -49,6 +50,7 @@ public:
 	// Method for updating time-dependent objects.
 	void Update(float timeTotal, float timeDelta);
 
+	// Handles touch input.
 	// Logic handled here because you can't have a "getGameState" function here, as it is a native type (Windows no likey)
 	void HandlePressInput(Windows::UI::Input::PointerPoint^ currentPoint);	// called when pointer is down, alters state
 	void HandleReleaseInput(Windows::UI::Input::PointerPoint^ currentPoint);	// called when pointer is released, alters state
@@ -66,6 +68,11 @@ private:
 	void displayScores();
 	void HandleAudio(float timeTotal, float timeDelta);
 	void speedUpGame();
+
+	GameState prevGameState;
+	GameState nextGameState;	// Only used for when in transition state, to keep track of which state to go to next.
+	float transitionTimer;	// Keeps track of how long the transition has lasted.  Works with TRANSITION_TIME constant.
+	void transitionScreens(GameState nextState);	// Transition from one screen to the next (title to game, game to pause, etc.)
 
 	// Music stuff
 	std::unique_ptr<DirectX::AudioEngine> m_audEngine;
@@ -93,6 +100,7 @@ private:
 	Spritesheet* pauseSheet;
 	Sprite* titleScreen;
 	Sprite* pauseScreen;
+	Sprite* transitionScreen;
 
 	Buildings* buildings;
 	Sprite* blockades;

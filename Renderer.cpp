@@ -65,13 +65,21 @@ void Renderer::CreateWindowSizeDependentResources()
 
 	//XMFLOAT2 defaultSizeOfScreen(960, 1600);
 
+	// Create the transition screen
+	ID3D11ShaderResourceView* m_transitionScreenTexture = nullptr;
+
+	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/transitionScreen.dds", nullptr, &m_transitionScreenTexture, MAXSIZE_T);
+	float scaleX = m_movementBounds.Width / MENU_SCREEN_WIDTH;
+	float scaleY = m_movementBounds.Height / MENU_SCREEN_HEIGHT;
+	scale = scaleX > scaleY ? scaleX : scaleY;
+	transitionScreen = new Sprite(m_transitionScreenTexture, XMFLOAT2(m_movementBounds.Width, m_movementBounds.Height),
+		XMFLOAT2(0, 0), &m_movementBounds, scale, 6);
+
 	//Create the title screen
 	ID3D11ShaderResourceView* m_titleScreenTexture = nullptr;
 
 	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/jumpingTitleSprite.dds", nullptr, &m_titleScreenTexture, MAXSIZE_T);
-	float scaleX = m_movementBounds.Width / MENU_SCREEN_WIDTH;
-	float scaleY = m_movementBounds.Height / MENU_SCREEN_HEIGHT;
-	scale = scaleX > scaleY ? scaleX : scaleY;
+	// Scale defined above
 	titleSheet = new Spritesheet(XMFLOAT2(MENU_SCREEN_WIDTH, MENU_SCREEN_HEIGHT), 4, MENU_SCREEN_WIDTH*2);
 	titleScreen = new Sprite(titleSheet, m_titleScreenTexture, XMFLOAT2(0, 0), &m_movementBounds, 0, 6, scale);
 
@@ -179,6 +187,13 @@ void Renderer::Update(float timeTotal, float timeDelta)
 {
 	HandleAudio(timeTotal, timeDelta);
 	switch (gameState) {
+	case GameState::Transition:	// If transition, simply wait until not transitioning anymore.
+		transitionTimer -= timeDelta;
+		if (transitionTimer <= 0)
+			gameState = nextGameState;
+		transitionScreen->setOpacity(1.0f - transitionTimer / TRANSITION_TIME);	// Set opacity as ratio
+		transitionScreen->Update(timeTotal, timeDelta);
+		break;
 	case GameState::InGameActive:
 		m_player->Update(buildings, timeTotal, timeDelta);
 		buildings->Update(timeTotal, timeDelta);
@@ -244,6 +259,22 @@ void Renderer::Render()
 	float* stringlength = m_spriteFont->MeasureString(L"Tap to start!").n128_f32;
 
 	switch (gameState) {
+		// TODO: Delete this shitty switch statement and make it better!!
+	case GameState::Transition:	// Draw black screen
+		switch (prevGameState) {	// Not the best solution...but goes through and calls the drawings of whatever needs to transition
+								// Better solution is to integrate transitioning into the respective gameState (next steps).
+		case GameState::InGamePaused:
+			pauseScreen->Draw(m_spriteBatch.get());
+			break;
+		case GameState::Initial:
+			titleScreen->Draw(m_spriteBatch.get());
+			m_spriteFont->DrawString(m_spriteBatch.get(), L"Tap to start!",
+				XMFLOAT2(m_movementBounds.Width / 2.0f, m_movementBounds.Height / (5.0f / 2.0f)),
+				Colors::Gold, 0.0f, XMFLOAT2(*stringlength / 2.0f, 0.0f), 1.0f, DirectX::SpriteEffects_None, 0.0f);
+			break;
+		}
+		transitionScreen->Draw(m_spriteBatch.get());
+		break;
 	case GameState::InGameActive:
 		m_player->Draw(m_spriteBatch.get());
 		buildings->Draw(m_spriteBatch.get());
@@ -279,7 +310,8 @@ void Renderer::HandlePressInput(Windows::UI::Input::PointerPoint^ currentPoint)
 		}
 		break;
 	case GameState::InGamePaused:
-		gameState = GameState::InGameActive;
+		//gameState = GameState::InGameActive;
+		transitionScreens(GameState::InGameActive);
 		break;
 	default:
 		break;
@@ -292,6 +324,7 @@ void Renderer::HandleReleaseInput(Windows::UI::Input::PointerPoint^ currentPoint
 
 	switch (gameState) {
 	case GameState::InGameActive:
+		// If a swipe has been registered.
 		if (swipeCounter >= SWIPE) {
 			swipeCounter = 0;
 			getPlayer()->Jump();
@@ -300,7 +333,8 @@ void Renderer::HandleReleaseInput(Windows::UI::Input::PointerPoint^ currentPoint
 	case GameState::InGamePaused:
 		break;
 	case GameState::Initial:
-		gameState = GameState::InGameActive;
+		//gameState = GameState::InGameActive;
+		transitionScreens(GameState::InGameActive);
 		m_music->Play(true);
 	}
 }
@@ -350,6 +384,13 @@ void Renderer::speedUpGame() {
 	float multiplier = SPEED_MULTIPLIER;
 	m_player->increaseSpeed(multiplier);
 	buildings->increaseSpeed(multiplier);
+}
+
+void Renderer::transitionScreens(GameState nextState) {
+	prevGameState = gameState;
+	transitionTimer = TRANSITION_TIME;
+	nextGameState = nextState;
+	gameState = GameState::Transition;
 }
 
 bool Renderer::onButton(Sprite* button, XMFLOAT2 pointer)

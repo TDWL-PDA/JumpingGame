@@ -49,7 +49,7 @@ namespace SpriteText
 		return L"X";
 	}
 
-	void SpriteText::displayNum(SpriteBatch* spriteBatch, SpriteFont* spriteFont, int myScore, XMFLOAT2 position, int zeroFill)
+	void SpriteText::displayNum(SpriteBatch* spriteBatch, SpriteFont* spriteFont, int myScore, XMFLOAT2 position, float scale, int zeroFill)
 	{
 		int numDigits = getNumDigits(myScore);
 		wchar_t const* num;
@@ -60,10 +60,11 @@ namespace SpriteText
 		{
 			tempScore = myScore % 10;
 			num = SpriteText::numToWchar_t(tempScore);
-			stringlength = spriteFont->MeasureString(num).n128_f32;
+			stringlength = spriteFont->MeasureString(num).n128_f32;	// scale the stringlength properly
+			*stringlength *= scale;
 
 			spriteFont->DrawString(spriteBatch, num, position,
-				Colors::Black, 0.0f, XMFLOAT2(*stringlength / 2.0f, 0.0f), 1.0f, DirectX::SpriteEffects_None, 0.0f);
+				Colors::White, 0.0f, XMFLOAT2(*stringlength / 2.0f, 0.0f), scale, DirectX::SpriteEffects_None, 0.0f);
 			position.x -= *stringlength;
 
 			myScore /= 10;
@@ -73,9 +74,10 @@ namespace SpriteText
 		for (int i = zeroFill - numDigits; i > 0; i--)
 		{
 			stringlength = spriteFont->MeasureString(L"0").n128_f32;
+			*stringlength *= scale;
 
 			spriteFont->DrawString(spriteBatch, L"0", position,
-				Colors::Black, 0.0f, XMFLOAT2(*stringlength / 2.0f, 0.0f), 1.0f, DirectX::SpriteEffects_None, 0.0f);
+				Colors::White, 0.0f, XMFLOAT2(*stringlength / 2.0f, 0.0f), scale, DirectX::SpriteEffects_None, 0.0f);
 			position.x -= *stringlength;
 		}
 	}

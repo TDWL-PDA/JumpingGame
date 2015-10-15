@@ -11,7 +11,7 @@ namespace SpriteText
 	wchar_t const* numToWchar_t(int num);
 	wchar_t const* letterToWchar_t(char letter);
 
-	void displayNum(SpriteBatch* spriteBatch, SpriteFont* spriteFont, int myScore, XMFLOAT2 position, int zeroFill);
+	void displayNum(SpriteBatch* spriteBatch, SpriteFont* spriteFont, int myScore, XMFLOAT2 position, float scale, int zeroFill);
 	int getNumDigits(int num);
 }
 

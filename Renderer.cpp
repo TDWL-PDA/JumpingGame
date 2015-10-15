@@ -365,22 +365,23 @@ void Renderer::displayScores()
 	if (score > highScore)
 		highScore = score;
 
-	float* digitLength = m_spriteFont->MeasureString(L"0").n128_f32;
+	float scale = 2.0f;	// Scale for the numbers, not the letters
+	float* digitLength = m_spriteFont->MeasureString(L"8").n128_f32;	// 8 is the fattest letter.
+	*digitLength *= scale;
 	XMFLOAT2 position = XMFLOAT2(m_movementBounds.Width - m_movementBounds.Width / 20.0f, m_movementBounds.Height / 20.0f + pauseButton->getHeight() + 20);	// replace 10 with variable
 	float *stringlength = m_spriteFont->MeasureString(L"Score").n128_f32;
 	m_spriteFont->DrawString(m_spriteBatch.get(), L"Score",
-		position, Colors::Black, 0.0f, XMFLOAT2(*stringlength, 0.0f), 1.0f, DirectX::SpriteEffects_None, 0.0f);
-
-	position.y += 32;
-	SpriteText::displayNum(m_spriteBatch.get(), m_spriteFont.get(), score, position, 0);
+		position, Colors::White, 0.0f, XMFLOAT2(*stringlength, 0.0f), 1.5f, DirectX::SpriteEffects_None, 0.0f);
+	position.y += 50;
+	SpriteText::displayNum(m_spriteBatch.get(), m_spriteFont.get(), score, position, scale, 0);
 	position.x = m_movementBounds.Width / 20;
-	position.y -= 32;
+	position.y -= 50;
 	m_spriteFont->DrawString(m_spriteBatch.get(), L"High Score",
-		position, Colors::Black, 0.0f, XMFLOAT2(0.0f, 0.0f), 1.0f, DirectX::SpriteEffects_None, 0.0f);
-	for (int i = 0; i < SpriteText::getNumDigits(highScore) - 1; i++)
+		position, Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), 1.5f, DirectX::SpriteEffects_None, 0.0f);
+	for (int i = 0; i < SpriteText::getNumDigits(highScore); i++)	// Move position to end of number
 		position.x += *digitLength;
-	position.y += 32;
-	SpriteText::displayNum(m_spriteBatch.get(), m_spriteFont.get(), highScore, position, 0);
+	position.y += 50;
+	SpriteText::displayNum(m_spriteBatch.get(), m_spriteFont.get(), highScore, position, scale, 0);
 }
 
 void Renderer::speedUpGame() {

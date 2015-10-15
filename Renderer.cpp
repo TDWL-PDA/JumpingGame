@@ -66,20 +66,27 @@ void Renderer::CreateWindowSizeDependentResources()
 	//XMFLOAT2 defaultSizeOfScreen(960, 1600);
 
 	// Create the transition screen
-	ID3D11ShaderResourceView* m_transitionScreenTexture = nullptr;
-
-	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/transitionScreen.dds", nullptr, &m_transitionScreenTexture, MAXSIZE_T);
-	float scaleX = m_movementBounds.Width / MENU_SCREEN_WIDTH;
-	float scaleY = m_movementBounds.Height / MENU_SCREEN_HEIGHT;
+	ID3D11ShaderResourceView* m_backgroundTexture = nullptr;
+	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/nightsky.dds", nullptr, &m_backgroundTexture, MAXSIZE_T);
+	float scaleX = m_movementBounds.Width / 1024;
+	float scaleY = m_movementBounds.Height / 1138;
 	scale = scaleX > scaleY ? scaleX : scaleY;
+	background = new Sprite(m_backgroundTexture, XMFLOAT2(1024, 1138),	// Magic numbers for now...
+		XMFLOAT2(0, 0), &m_movementBounds, scale, 6);
+
+	// Create the transition screen
+	ID3D11ShaderResourceView* m_transitionScreenTexture = nullptr;
+	scaleX = m_movementBounds.Width / MENU_SCREEN_WIDTH;
+	scaleY = m_movementBounds.Height / MENU_SCREEN_HEIGHT;
+	scale = scaleX > scaleY ? scaleX : scaleY;
+	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/transitionScreen.dds", nullptr, &m_transitionScreenTexture, MAXSIZE_T);
 	transitionScreen = new Sprite(m_transitionScreenTexture, XMFLOAT2(m_movementBounds.Width, m_movementBounds.Height),
 		XMFLOAT2(0, 0), &m_movementBounds, scale, 6);
 
 	//Create the title screen
-	ID3D11ShaderResourceView* m_titleScreenTexture = nullptr;
-
-	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/jumpingTitleSprite.dds", nullptr, &m_titleScreenTexture, MAXSIZE_T);
 	// Scale defined above
+	ID3D11ShaderResourceView* m_titleScreenTexture = nullptr;
+	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/jumpingTitleSprite.dds", nullptr, &m_titleScreenTexture, MAXSIZE_T);
 	titleSheet = new Spritesheet(XMFLOAT2(MENU_SCREEN_WIDTH, MENU_SCREEN_HEIGHT), 4, MENU_SCREEN_WIDTH*2);
 	titleScreen = new Sprite(titleSheet, m_titleScreenTexture, XMFLOAT2(0, 0), &m_movementBounds, 0, 6, scale);
 
@@ -108,18 +115,14 @@ void Renderer::CreateWindowSizeDependentResources()
 	ID3D11ShaderResourceView* m_buildingsTexture = nullptr;
 	XMFLOAT2 positionOfBuildings(0, m_movementBounds.Height - BUILDING_HEIGHT);
 	XMFLOAT2 sizeOfBuildings(BUILDING_WIDTH, BUILDING_HEIGHT);
-
 	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/block.dds", nullptr, &m_buildingsTexture, MAXSIZE_T);
-
 	buildings = new Buildings(m_buildingsTexture, sizeOfBuildings, positionOfBuildings, &m_movementBounds);
 
 	//Create the blockades
 	ID3D11ShaderResourceView* m_blockadesTexture = nullptr;
 	XMFLOAT2 positionOfBlockades(m_movementBounds.Width - 150, 0);
 	XMFLOAT2 sizeOfBlockades(150, 300);
-
 	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/blockade.dds", nullptr, &m_blockadesTexture, MAXSIZE_T);
-
 	blockades = new Sprite(m_blockadesTexture, sizeOfBlockades, positionOfBlockades, &m_movementBounds);
 
 	//Create the pause button
@@ -127,9 +130,7 @@ void Renderer::CreateWindowSizeDependentResources()
 	XMFLOAT2 positionOfPause(10, 10);
 	XMFLOAT2 sizeOfButton(32, 38);
 	scale = 2.0;
-
 	CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Assets/pauseButton.dds", nullptr, &m_pauseTexture, MAXSIZE_T);
-
 	pauseButton = new Sprite(m_pauseTexture, sizeOfButton, positionOfPause, &m_movementBounds, scale);
 
 	// Audio
@@ -195,6 +196,7 @@ void Renderer::Update(float timeTotal, float timeDelta)
 		transitionScreen->Update(timeTotal, timeDelta);
 		break;
 	case GameState::InGameActive:
+		background->Update(timeTotal, timeDelta);	// Currently unnecessary
 		m_player->Update(buildings, timeTotal, timeDelta);
 		buildings->Update(timeTotal, timeDelta);
 
@@ -276,6 +278,7 @@ void Renderer::Render()
 		transitionScreen->Draw(m_spriteBatch.get());
 		break;
 	case GameState::InGameActive:
+		background->Draw(m_spriteBatch.get());
 		m_player->Draw(m_spriteBatch.get());
 		buildings->Draw(m_spriteBatch.get());
 		//blockades->Draw(m_spriteBatch.get());

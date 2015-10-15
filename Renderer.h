@@ -101,6 +101,7 @@ private:
 	Sprite* titleScreen;
 	Sprite* pauseScreen;
 	Sprite* transitionScreen;
+	Sprite* background;
 
 	Buildings* buildings;
 	Sprite* blockades;
